@@ -73,3 +73,9 @@ main {
     margin-bottom: 20px;
     min-height: 40px; 
 }
+.patterns {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+}
