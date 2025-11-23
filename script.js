@@ -1,3 +1,5 @@
+/* AUTORES: José Manuel Gómez Ruiz e Irene Mendoza Mederos*/
+
 //Clase para las células
 class Cell {
     constructor(isAlive = false) {
