@@ -146,50 +146,61 @@ class World {
             document.getElementById('step-info').textContent = `Simulación en marcha: Paso ${this.stepCount}`; // Actualizamos el texto con el paso actual
         }
         //Manejamos el ratón
-        handleMouseClick(event){
-            if (this.isSimulating) return; // No permitimos cambios durante la simulación
+        handleMouseClick(event) {
+            if (this.isSimulating) return;
 
+            // 1. Obtener la posición y límites del canvas.
             const rect = this.ctx.canvas.getBoundingClientRect();
+            
+            // 2. Calcular la posición (x, y) relativa al canvas.
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
-            // Calculamos índices de la matriz
+            // 3. Calcular los índices de la matriz (fila, columna).
             const col = Math.floor(x / CELL_SIZE);
             const row = Math.floor(y / CELL_SIZE);
 
             if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
                 this.cells[row][col].toggle();
-                this.draw();
-            }
-        }   
-        //Al pasar el ratón, muestra info de la célula
-        handleMouseMove(event) {
-            //Convertimos coordenadas del ratón a coordenadas del canvas
-            const rect = this.ctx.canvas.getBoundingClientRect(); 
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-
-            const col = Math.floor(x / CELL_SIZE);
-            const row = Math.floor(y / CELL_SIZE);
-
-            const infoElement = document.getElementById('cell-info');
-            
-            if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
-                const cell = this.cells[row][col];
-                const stateText = cell.isAlive ? 'viva' : 'muerta';
-                const steps = cell.aliveTime === 0 ? this.stepCount - cell.lastDeathStep : cell.aliveTime;
-                
-                // Si la célula está muerta (aliveTime=0), su "tiempo muerta" es el número total de pasos
-                const timeInfo = cell.isAlive ? 
-                    `lleva viva ${cell.aliveTime} pasos.` : 
-                    `lleva muerta ${this.stepCount - cell.aliveTime} pasos (Asumiendo que el tiempo que lleva muerta es el total de pasos si está en su estado inicial).`;
-
-                infoElement.textContent = `La célula (${col}, ${row}) ${timeInfo}`;
-                // Nota: La coordenada (3, 8) del ejemplo [cite: 60] es (columna, fila)
-            } else {
-                infoElement.textContent = 'Pasa el ratón sobre una célula para ver información.';
+                this.draw(); // Redibujar solo si hubo un cambio
             }
         }
+        //Al pasar el ratón, muestra info de la célula
+        handleMouseMove(event) {
+            const infoElement = document.getElementById('cell-info');
+            const rect = this.ctx.canvas.getBoundingClientRect();
+
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                const col = Math.floor(x / CELL_SIZE);
+                const row = Math.floor(y / CELL_SIZE);
+
+                if (this.lastHoveredCell && this.lastHoveredCell.row === row && this.lastHoveredCell.col === col) {
+                    return; 
+                }
+                
+                if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
+                    const cell = this.cells[row][col];
+                    const stateText = cell.isAlive ? 'viva' : 'muerta';
+                    
+                    let timeInfo;
+                    if (cell.isAlive) {
+                        timeInfo = `lleva viva ${cell.aliveTime} pasos.`;
+                    } else {
+                        // Se asume que el tiempo muerta es el tiempo total (stepCount) si aliveTime es 0.
+                        timeInfo = `está muerta (simulación va por el paso ${this.stepCount}).`; 
+                    }
+
+                    infoElement.textContent = `La célula (${col}, ${row}) ${timeInfo}`;
+                    
+                    // Almacenar la celda actual para la próxima comprobación
+                    this.lastHoveredCell = { row: row, col: col };
+                } else {
+                    infoElement.textContent = 'Pasa el ratón sobre una célula para ver información.';
+                    this.lastHoveredCell = null; // Reiniciar
+                }
+            }
         //Iniciamos la simulación
         play(){
             if (this.isSimulating) return;
