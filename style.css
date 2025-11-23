@@ -80,10 +80,10 @@ main {
     border-radius: 4px;
 }
 p.step-info {
-    color: #000000;
+    color: #ffffff;
 }
 
-title {
+h1 {
     color: #ffffff;
     text-shadow: 2px 2px 5px #ce1891; /* sombra rosa fuerte */
 
