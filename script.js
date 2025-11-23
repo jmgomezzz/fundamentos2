@@ -1,44 +1,31 @@
 //Clase para las células
 class Cell {
-    constructor (isAlive = false) {
+    constructor(isAlive = false) {
         this.isAlive = isAlive;
-        this.aliveTime = isAlive ? 1 : 0; // Contador de tiempo que está viva
+        this.stateTime = isAlive ? 1 : 0; // tiempo que lleva en SU ESTADO ACTUAL
     }
-    //Actualizamos el estado de la célula
-    calcularEstado (aliveNeighbors) {
-        let newState = this.isAlive;
 
-        if (this.isAlive) {
-            if (aliveNeighbors < 2 || aliveNeighbors > 3) { //sobrevive con 2 o 3 vecinas
-                newState = false; 
-            }
+    aplicarEstado(newState) {
+        if (newState === this.isAlive) {
+            // sigue en el mismo estado, aumenta el contador
+            this.stateTime += 1;
         } else {
-            if (aliveNeighbors === 3) { //nace con 3 vecinas
-                newState = true; 
-            }
-        }
-        return newState;
-    }
-    //Aplicamos el nuevo estado
-    aplicarEstado (newState) {
-        if (newState) {
-            this.isAlive = true;
-            this.aliveTime += 1; // Incrementamos el tiempo viva
-        } else {
-            this.isAlive = false;
-            this.aliveTime = 0; //Si muere, se reinicia, si sigue muerta se queda en 0
+            // cambia de estado → resetea
+            this.isAlive = newState;
+            this.stateTime = 1;
         }
     }
-    //Método para alternar el estado de la célula
-    toggle () {
+
+    toggle() {
         this.isAlive = !this.isAlive;
-        this.aliveTime = this.isAlive ? 1 : 0;
+        this.stateTime = 1;
     }
 }
-
+    
 //Clase mundo
 //Constantes para el mundo
 const N = 40; //Ancho/alto del mundo
+const Nstep = 10;
 const CELL_SIZE = 15; //Tamaño del lado de la celda en pixeles
 
 class World {
@@ -217,7 +204,6 @@ class World {
 
     //Manejamos el ratón
     handleMouseClick(event) {
-        if (this.isSimulating) return;
 
         // 1. Obtener la posición y límites del canvas.
         const rect = this.ctx.canvas.getBoundingClientRect();
@@ -256,9 +242,9 @@ class World {
             
             let timeInfo;
             if (cell.isAlive) {
-                timeInfo = `lleva viva ${cell.aliveTime} pasos.`;
+                timeInfo = `lleva viva ${cell.stateTime} pasos.`;
             } else {
-                timeInfo = `está muerta (simulación va por el paso ${this.stepCount}).`; 
+                timeInfo = `lleva muerta ${cell.stateTime} pasos.`;
             }
 
             infoElement.textContent = `La célula (${col}, ${row}) ${timeInfo}`;
@@ -278,7 +264,7 @@ class World {
         this.isSimulating = true;
         
         // Avance: N pasos por segundo
-        const intervalTime = 1000 / N; // milisegundos
+        const intervalTime = 1000 / Nstep; // milisegundos
         
         // setInterval ejecuta la función cada 'intervalTime' ms.
         this.timerId = setInterval(() => this.advance(), intervalTime);
