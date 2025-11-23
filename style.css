@@ -79,8 +79,14 @@ main {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-p{
+p.step-info {
+    color: #000000;
+}
+
+title {
     color: #ffffff;
+    text-shadow: 2px 2px 5px #ce1891; /* sombra rosa fuerte */
+
 }
 
 .controls {
