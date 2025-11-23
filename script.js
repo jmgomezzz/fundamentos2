@@ -1,0 +1,234 @@
+//Clase para las células
+class Cell {
+    constructor (isAlive = false) {
+        this.isAlive = isAlive;
+        this.aliveTime = isAlive ? 1 : 0; // Contador de tiempo que está viva
+    }
+    //Actualizamos el estado de la célula
+    calcularEstado (aliveNeighbors) {
+        let newState = this.isAlive;
+
+        if (this.isAlive) {
+            if (aliveNeighbors < 2 || aliveNeighbors > 3) { //sobrevive con 2 o 3 vecinas
+                newState = false; 
+            }
+        } else {
+            if (aliveNeighbors === 3) { //nace con 3 vecinas
+                newState = true; 
+            }
+        }
+        return newState;
+    }
+    //Aplicamos el nuevo estado
+    aplicarEstado (newState) {
+        if (newState) {
+            this.isAlive = true;
+            this.aliveTime += 1; // Incrementamos el tiempo viva
+        } else {
+            this.isAlive = false;
+            this.aliveTime = 0; //Si muere, se reinicia, si sigue muerta se queda en 0
+        }
+    }
+    //Método para alternar el estado de la célula
+    toggle () {
+        this.isAlive = !this.isAlive;
+        this.aliveTime = this.isAlive ? 1 : 0;
+    }
+}
+
+
+
+//Clase mundo
+//Constantes para el mundo
+const N = 40; //Ancho/alto del mundo
+const CELL_SIZE = 15; //Tamaño del lado de la celda en pixeles
+
+class World {
+    constructor(size){
+        this.size = size;
+        this.cells = this.crearGridVacío();
+        this.stepCount = 0; 
+        this.simulando = false;
+        this.timerId = null; // ID del temporizador
+
+        //Inicializamos el canvas
+        const canvas = document.getElementById('game-canvas');
+        this.ctx = canvas.getContext('2d'); //Así obtenemos el contexto 2D del canvas y podemos dibujar en el
+        canvas.width = size * CELL_SIZE;
+        canvas.height = size * CELL_SIZE;
+
+        //Manejadores de eventos
+        canvas.addEventListener('click', this.handleMouseClick.bind(this));
+        canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+
+        //Dibujar
+        this.draw();
+    }
+
+
+    //Crear una cuadrícula vacía
+    crearGridVacío() {
+        const grid = [];
+        for (let i = 0; i < this.size; i++) {
+            grid[i] = [];
+            for (let j = 0; j < this.size; j++) {
+                grid[i][j] = new Cell(false);
+            }
+        }
+        return grid;
+    }
+
+    //Calcula la posición para conectar el mundo (los bordes)
+    wrap(coord){
+        return (coord + this.size) % this.size;
+    }
+
+    //Contamos las vecinas vivas
+    getAliveNeighbors(fila, columna){
+        let count = 0;
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                if (i === 0 && j === 0) continue; // Saltamos la célula actual
+                const neighborRow = this.wrap(fila + i);
+                const neighborCol = this.wrap(columna + j);
+                if (this.cells[neighborRow][neighborCol].isAlive) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    //Avanzamos un turno
+        advance(){
+            //Calculamos los proximos estados
+            const newStates = [];
+            for (let i = 0; i < this.size; i++) {
+                newStates[i] = [];
+                for (let j = 0; j < this.size; j++) {
+                    const aliveNeighbors = this.getAliveNeighbors(i, j);
+                    newStates[i][j] = this.cells[i][j].calcularEstado(aliveNeighbors);
+                }
+            }
+            //Aplicamos los nuevos estados
+            for (let i = 0; i < this.size; i++) {
+                for (let j = 0; j < this.size; j++) {
+                    this.cells[i][j].aplicarEstado(newStates[i][j]);
+                }
+            }
+            this.stepCount++;
+            this.updateInfoDisplay();
+            this.draw(); //Redibujamos
+        }
+
+        //Métodos de interfaz y control de simulación
+        draw(){
+            this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); //Borramos el canvas antes de dibujar
+            for (let i = 0; i < this.size; i++) {
+            for (let j = 0; j < this.size; j++) {
+                const cell = this.cells[i][j];
+                const x = j * CELL_SIZE;
+                const y = i * CELL_SIZE;
+
+                if (cell.isAlive) {
+                    this.ctx.fillStyle = 'black'; // Célula viva [cite: 33]
+                    this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+                } else {
+                    //Dibujamos el borde de la rejilla
+                    this.ctx.strokeStyle = '#eee';
+                    this.ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+                }
+            }
+        }
+
+    }
+        //Actualizamos la información de la simulación
+        updateInfoDisplay(){
+            document.getElementById('step-info').textContent = `Simulación en marcha: Paso ${this.stepCount}`; // Actualizamos el texto con el paso actual
+        }
+        //Manejamos el ratón
+        handleMouseClick(event){
+            if (this.isSimulating) return; // No permitimos cambios durante la simulación
+
+            const rect = this.ctx.canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Calculamos índices de la matriz
+            const col = Math.floor(x / CELL_SIZE);
+            const row = Math.floor(y / CELL_SIZE);
+
+            if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
+                this.cells[row][col].toggle();
+                this.draw();
+            }
+        }   
+        //Al pasar el ratón, muestra info de la célula
+        handleMouseMove(event) {
+            //Convertimos coordenadas del ratón a coordenadas del canvas
+            const rect = this.ctx.canvas.getBoundingClientRect(); 
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            const col = Math.floor(x / CELL_SIZE);
+            const row = Math.floor(y / CELL_SIZE);
+
+            const infoElement = document.getElementById('cell-info');
+            
+            if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
+                const cell = this.cells[row][col];
+                const stateText = cell.isAlive ? 'viva' : 'muerta';
+                const steps = cell.aliveTime === 0 ? this.stepCount - cell.lastDeathStep : cell.aliveTime;
+                
+                // Si la célula está muerta (aliveTime=0), su "tiempo muerta" es el número total de pasos
+                const timeInfo = cell.isAlive ? 
+                    `lleva viva ${cell.aliveTime} pasos.` : 
+                    `lleva muerta ${this.stepCount - cell.aliveTime} pasos (Asumiendo que el tiempo que lleva muerta es el total de pasos si está en su estado inicial).`;
+
+                infoElement.textContent = `La célula (${col}, ${row}) ${timeInfo}`;
+                // Nota: La coordenada (3, 8) del ejemplo [cite: 60] es (columna, fila)
+            } else {
+                infoElement.textContent = 'Pasa el ratón sobre una célula para ver información.';
+            }
+        }
+        //Iniciamos la simulación
+        play(){
+            if (this.isSimulating) return;
+
+            this.isSimulating = true;
+            
+            // Avance: N pasos por segundo
+            const intervalTime = 1000 / N; // milisegundos
+            
+            // setInterval ejecuta la función cada 'intervalTime' ms.
+            this.timerId = setInterval(() => this.advance(), intervalTime);
+
+            // Control de botones
+            document.getElementById('play-button').disabled = true;
+            document.getElementById('stop-button').disabled = false;
+        }
+
+        //Detenemos
+        stop(){
+            if (!this.isSimulating) return;
+
+            this.isSimulating = false;
+            
+            // Detiene el temporizador asociado. 
+            clearInterval(this.timerId); 
+            this.timerId = null;
+
+            // Control de botones
+            document.getElementById('play-button').disabled = false;
+            document.getElementById('stop-button').disabled = true;
+        }
+    }
+
+//Inicializamos los eventos y el mundo 
+document.addEventListener('DOMContentLoaded', () => {
+    //Instanciamos el mundo
+    const world = new World(N);
+
+    //Conectamos eventos a botones
+    document.getElementById('play-button').addEventListener('click', () => world.play());
+    document.getElementById('stop-button').addEventListener('click', () => world.stop());
+});
