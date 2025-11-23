@@ -43,3 +43,16 @@ footer {
     font-size: 0.8em;
     color: #666;
 }
+
+#step-info, #cell-info {
+    min-height: 25px;
+    white-space: nowrap;
+}
+
+.controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 20px;
+    height: 60px; 
+}
