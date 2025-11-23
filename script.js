@@ -50,6 +50,7 @@ class World {
         this.stepCount = 0; 
         this.simulando = false;
         this.timerId = null; // ID del temporizador
+        this.lastHoveredCell = null; // Para mejorar la info al pasar el ratón
 
         //Inicializamos el canvas
         const canvas = document.getElementById('game-canvas');
