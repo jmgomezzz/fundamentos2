@@ -183,7 +183,14 @@ class World {
                 [2, 0],
                 [2, 1],
                 [2, 2]
-            ]
+            ],
+            // Faro (beacon), este es nuevo nuestro jeje
+             beacon: [
+                [0, 0], [0, 1],
+                [1, 0], [1, 1],
+                [2, 2], [2, 3],
+                [3, 2], [3, 3]
+            ]   
         };
 
         const relativeCoords = patterns[patternName];
@@ -320,5 +327,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('pattern-glider').addEventListener('click', () => {
         world.stop();
         world.applyPattern('glider');
+    });
+    document.getElementById('pattern-beacon').addEventListener('click', () => {
+        world.stop();
+        world.applyPattern('beacon');
     });
 });
