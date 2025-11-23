@@ -4,6 +4,20 @@ class Cell {
         this.isAlive = isAlive;
         this.stateTime = isAlive ? 1 : 0; // tiempo que lleva en SU ESTADO ACTUAL
     }
+    calcularEstado(aliveNeighbors) {
+        let newState = this.isAlive;
+
+        if (this.isAlive) {
+            if (aliveNeighbors < 2 || aliveNeighbors > 3) { 
+                newState = false; // muere
+            }
+        } else {
+            if (aliveNeighbors === 3) { 
+                newState = true; // nace
+            }
+        }
+        return newState;
+    }
 
     aplicarEstado(newState) {
         if (newState === this.isAlive) {
@@ -137,7 +151,7 @@ class World {
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 this.cells[i][j].isAlive = false;
-                this.cells[i][j].aliveTime = 0;
+                this.cells[i][j].stateTime = 0;
             }
         }
         this.stepCount = 0;
@@ -194,7 +208,7 @@ class World {
             const col = this.wrap(centerCol + dc);
             const cell = this.cells[row][col];
             cell.isAlive = true;
-            cell.aliveTime = 1;
+            cell.stateTime = 1;
         }
 
         this.stepCount = 0;
