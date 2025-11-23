@@ -4,6 +4,8 @@ class Cell {
         this.isAlive = isAlive;
         this.stateTime = isAlive ? 1 : 0; // tiempo que lleva en SU ESTADO ACTUAL
     }
+
+    //Actualizamos el estado de la célula (REGLAS DE CONWAY)
     calcularEstado(aliveNeighbors) {
         let newState = this.isAlive;
 
@@ -19,6 +21,7 @@ class Cell {
         return newState;
     }
 
+    //Aplicamos el nuevo estado
     aplicarEstado(newState) {
         if (newState === this.isAlive) {
             // sigue en el mismo estado, aumenta el contador
@@ -30,6 +33,7 @@ class Cell {
         }
     }
 
+    //Método para alternar el estado de la célula
     toggle() {
         this.isAlive = !this.isAlive;
         this.stateTime = 1;
@@ -39,17 +43,17 @@ class Cell {
 //Clase mundo
 //Constantes para el mundo
 const N = 40; //Ancho/alto del mundo
-const Nstep = 10;
+const Nstep = 10;   //Pasos por segundo de simulación
 const CELL_SIZE = 15; //Tamaño del lado de la celda en pixeles
 
 class World {
     constructor(size){
         this.size = size;
-        this.cells = this.crearGridVacío();
+        this.cells = this.crearGridVacío();  // ← tu nombre original
         this.stepCount = 0; 
-        this.isSimulating = false; // <- antes tenías "simulando"
-        this.timerId = null; // ID del temporizador
-        this.lastHoveredCell = null; // Para mejorar la info al pasar el ratón
+        this.isSimulating = false; 
+        this.timerId = null; 
+        this.lastHoveredCell = null;
 
         //Inicializamos el canvas
         const canvas = document.getElementById('game-canvas');
@@ -63,6 +67,7 @@ class World {
 
         //Dibujar
         this.draw();
+        this.updateInfoDisplay();
     }
 
     //Crear una cuadrícula vacía
@@ -100,7 +105,7 @@ class World {
 
     //Avanzamos un turno
     advance(){
-        //Calculamos los proximos estados
+        //Calculamos los próximos estados
         const newStates = [];
         for (let i = 0; i < this.size; i++) {
             newStates[i] = [];
@@ -109,31 +114,33 @@ class World {
                 newStates[i][j] = this.cells[i][j].calcularEstado(aliveNeighbors);
             }
         }
+
         //Aplicamos los nuevos estados
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 this.cells[i][j].aplicarEstado(newStates[i][j]);
             }
         }
+
         this.stepCount++;
         this.updateInfoDisplay();
-        this.draw(); //Redibujamos
+        this.draw();
     }
 
     //Métodos de interfaz y control de simulación
     draw(){
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height); //Borramos el canvas antes de dibujar
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
+
                 const cell = this.cells[i][j];
                 const x = j * CELL_SIZE;
                 const y = i * CELL_SIZE;
 
                 if (cell.isAlive) {
-                    this.ctx.fillStyle = 'black'; // Célula viva
+                    this.ctx.fillStyle = 'black'; 
                     this.ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                 } else {
-                    //Dibujamos el borde de la rejilla
                     this.ctx.strokeStyle = '#eee';
                     this.ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
                 }
@@ -143,7 +150,12 @@ class World {
 
     //Actualizamos la información de la simulación
     updateInfoDisplay(){
-        document.getElementById('step-info').textContent = `Simulación en marcha: Paso ${this.stepCount}`;
+        const stepInfo = document.getElementById('step-info');
+        if (this.isSimulating) {
+            stepInfo.textContent = `Simulación en marcha: Paso ${this.stepCount}`;
+        } else {
+            stepInfo.textContent = `Simulación detenida: Paso ${this.stepCount}`;
+        }
     }
 
     // Vaciar todas las células (muertas)
@@ -151,7 +163,7 @@ class World {
         for (let i = 0; i < this.size; i++) {
             for (let j = 0; j < this.size; j++) {
                 this.cells[i][j].isAlive = false;
-                this.cells[i][j].stateTime = 0;
+                this.cells[i][j].stateTime = 0; 
             }
         }
         this.stepCount = 0;
@@ -163,13 +175,11 @@ class World {
     applyPattern(patternName) {
         // Patrones definidos como coordenadas relativas (fila, columna)
         const patterns = {
-            // Parpadeador (blinker)
             blinker: [
                 [0, -1],
                 [0, 0],
                 [0, 1]
             ],
-            // Barco 
             boat: [
                 [0, 1],
                 [0, 2],
@@ -177,7 +187,6 @@ class World {
                 [1, 2],
                 [2, 1]
             ],
-            // Planeador (glider)
             glider: [
                 [0, 1],
                 [1, 2],
@@ -185,24 +194,23 @@ class World {
                 [2, 1],
                 [2, 2]
             ],
-            // Faro (beacon), este es nuevo nuestro jeje
-             beacon: [
+            beacon: [
                 [0, 0], [0, 1],
                 [1, 0], [1, 1],
                 [2, 2], [2, 3],
                 [3, 2], [3, 3]
-            ]   
+            ]
         };
 
         const relativeCoords = patterns[patternName];
         if (!relativeCoords) return;
 
-        // Primero vaciamos el mundo
         this.clearCells();
 
         const centerRow = Math.floor(this.size / 2);
         const centerCol = Math.floor(this.size / 2);
 
+        // Aplicamos las células vivas del patrón
         for (const [dr, dc] of relativeCoords) {
             const row = this.wrap(centerRow + dr);
             const col = this.wrap(centerCol + dc);
@@ -218,21 +226,16 @@ class World {
 
     //Manejamos el ratón
     handleMouseClick(event) {
-
-        // 1. Obtener la posición y límites del canvas.
         const rect = this.ctx.canvas.getBoundingClientRect();
-        
-        // 2. Calcular la posición (x, y) relativa al canvas.
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
-        // 3. Calcular los índices de la matriz (fila, columna).
         const col = Math.floor(x / CELL_SIZE);
         const row = Math.floor(y / CELL_SIZE);
 
         if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
             this.cells[row][col].toggle();
-            this.draw(); // Redibujar solo si hubo un cambio
+            this.draw();
         }
     }
 
@@ -247,13 +250,15 @@ class World {
         const col = Math.floor(x / CELL_SIZE);
         const row = Math.floor(y / CELL_SIZE);
 
-        if (this.lastHoveredCell && this.lastHoveredCell.row === row && this.lastHoveredCell.col === col) {
+        if (this.lastHoveredCell && 
+            this.lastHoveredCell.row === row && 
+            this.lastHoveredCell.col === col) {
             return; 
         }
         
         if (row >= 0 && row < this.size && col >= 0 && col < this.size) {
             const cell = this.cells[row][col];
-            
+
             let timeInfo;
             if (cell.isAlive) {
                 timeInfo = `lleva viva ${cell.stateTime} pasos.`;
@@ -262,12 +267,11 @@ class World {
             }
 
             infoElement.textContent = `La célula (${col}, ${row}) ${timeInfo}`;
-            
-            // Almacenar la celda actual para la próxima comprobación
             this.lastHoveredCell = { row: row, col: col };
+
         } else {
             infoElement.textContent = 'Pasa el ratón sobre una célula para ver información.';
-            this.lastHoveredCell = null; // Reiniciar
+            this.lastHoveredCell = null;
         }
     }
 
@@ -276,9 +280,9 @@ class World {
         if (this.isSimulating) return;
 
         this.isSimulating = true;
-        
+
         // Avance: N pasos por segundo
-        const intervalTime = 1000 / Nstep; // milisegundos
+        const intervalTime = 1000 / Nstep; 
         
         // setInterval ejecuta la función cada 'intervalTime' ms.
         this.timerId = setInterval(() => this.advance(), intervalTime);
@@ -286,6 +290,8 @@ class World {
         // Control de botones
         document.getElementById('play-button').disabled = true;
         document.getElementById('stop-button').disabled = false;
+
+        this.updateInfoDisplay();
     }
 
     //Detenemos
@@ -293,19 +299,21 @@ class World {
         if (!this.isSimulating) return;
 
         this.isSimulating = false;
-        
-        // Detiene el temporizador asociado. 
+
         clearInterval(this.timerId); 
         this.timerId = null;
 
         // Control de botones
         document.getElementById('play-button').disabled = false;
         document.getElementById('stop-button').disabled = true;
+
+        this.updateInfoDisplay();
     }
 }
 
 //Inicializamos los eventos y el mundo 
 document.addEventListener('DOMContentLoaded', () => {
+
     //Instanciamos el mundo
     const world = new World(N);
 
@@ -328,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         world.stop();
         world.applyPattern('glider');
     });
+
     document.getElementById('pattern-beacon').addEventListener('click', () => {
         world.stop();
         world.applyPattern('beacon');
