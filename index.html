@@ -4,7 +4,7 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--Para usarse en movil, aunque no se si nos hace falta la verdad, pero aquí está-->
     <title>Práctica 2: El Juego de la Vida</title>
     <link rel="stylesheet" href="style.css">
     </head>
@@ -13,24 +13,27 @@
         <h1>El Juego de la Vida</h1>
     </header>
     <main style="position: relative;">
+        <!--Sección de controles e info de simulación-->
         <section class="controls">
             <button id="play-button">Jugar</button>
             <button id="stop-button" disabled>Detener</button>
             
             <p id="step-info">Simulación en marcha: Paso 0</p>
         </section>
+        <!--Sección de patrones predefinidos-->
         <section class="patterns">
             <button id="pattern-blinker">Parpadeador</button>
             <button id="pattern-boat">Barco</button>
             <button id="pattern-glider">Planeador</button>
-                <button id="pattern-beacon">Faro</button>
+            <button id="pattern-beacon">Faro</button>
 
         </section>
+        <!--El canvas del juego -->
         <canvas id="game-canvas"></canvas>
         
         <p id="cell-info"></p>
 </main>
-
+    <!-- La autoría que hemos decidido poner de pie de página y verás tu como no sea lo suficientemente visible-->
     <footer>
         <p>Autores: José Manuel Gómez Ruiz e Irene Mendoza Mederos</p>
         </footer>
