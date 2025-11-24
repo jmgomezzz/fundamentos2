@@ -38,19 +38,19 @@ button {
     transition: transform 0.2s, background-color 0.2s; /*Para crear animación*/
 }
 
-button:hover {
+button:hover { /* Cambia el color y agranda el botón */
       transform: scale(1.1); /* Se agranda al pasar el ratón por encima */
       background-color: #ce1891;
       color: #ffffff;
     }
 
 button:disabled {
-    background-color: #ccc;
+    background-color: #ccc; /* Muestra los botones desactivados en gris*/
     cursor: not-allowed; /*Deja el cursor bloqueado*/
 
 }
 
-footer {
+footer { /* Estilo del pie de página */
     margin-top: 30px;
     font-size: 0.8em;
     color: #d7d7d7;
@@ -66,13 +66,9 @@ main {
 
 #cell-info {
     position: absolute;
-    
-
     bottom: -30px; 
     left: 50%;
     transform: translateX(-50%); /* Centra el texto */
-    
-
     white-space: nowrap; /* Evita saltos de línea */
     padding: 5px; 
     background-color: #f4f4f4;
