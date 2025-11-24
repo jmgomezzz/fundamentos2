@@ -3,7 +3,7 @@
 body {
     font-family: Arial, sans-serif;
     display: flex;
-    flex-direction: column;
+    flex-direction: column;  /* Elementos en columna */
     align-items: center;
     margin: 20px;
     background-color: #060606;
@@ -21,33 +21,33 @@ h1 {
 }
 
 #game-canvas {
-    border: 1px solid #000;
-    background-color: #fff;
+    border: 1px solid #000; /* Borde negro */
+    background-color: #fff; /* Fondo blanco del tablero */
     /* El tamaño final se ajustará en JS para ser NxN */
-    box-shadow: 0 0 20px #00ffcc;
+    box-shadow: 0 0 20px #00ffcc; /*Poner sombra turquesa al borde del tablero*/
 }
 
 button {
     padding: 10px 20px;
     cursor: pointer;
-   /* background-color: #4CAF50;*/
     background-color: #57f3d4;
     color: #121212;
-    border: none;
+    border: none; /*Sin borde*/
     cursor: pointer;
-    border-radius: 5px;
-    transition: transform 0.2s, background-color 0.2s;
+    border-radius: 5px; /*Para poner bordes del botón redondeados*/
+    transition: transform 0.2s, background-color 0.2s; /*Para crear animación*/
 }
 
 button:hover {
-      transform: scale(1.1);
+      transform: scale(1.1); /* Se agranda al pasar el ratón por encima */
       background-color: #ce1891;
       color: #ffffff;
     }
 
 button:disabled {
     background-color: #ccc;
-    cursor: not-allowed;
+    cursor: not-allowed; /*Deja el cursor bloqueado*/
+
 }
 
 footer {
@@ -67,13 +67,13 @@ main {
 #cell-info {
     position: absolute;
     
-  
+
     bottom: -30px; 
     left: 50%;
     transform: translateX(-50%); /* Centra el texto */
     
-    
-    white-space: nowrap; 
+
+    white-space: nowrap; /* Evita saltos de línea */
     padding: 5px; 
     background-color: #f4f4f4;
     border: 1px solid #ccc;
@@ -85,7 +85,7 @@ main {
 
 h1 {
     color: #ffffff;
-    text-shadow: 2px 2px 5px #ce1891; /* sombra rosa fuerte */
+    text-shadow: 2px 2px 5px #ce1891; /* Sombra rosa fuerte para dar efecto de brillo al título*/
 
 }
 
